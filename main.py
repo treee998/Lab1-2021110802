@@ -32,8 +32,19 @@ def showDirectedGraph(graph):
 
 
 def queryBridgeWords(graph, word1, word2):
-    if word1 not in graph or word2 not in graph:
-        return "No {} or {} in the graph!".format(word1, word2)
+    def is_single_word(word):
+        return len(word.split()) == 1
+
+    if not word1 or not word2:
+        return "Both words must be provided!"
+    if not is_single_word(word1) or not is_single_word(word2):
+        return "Both inputs must be single words!"
+    if word1 not in graph and word2 in graph:
+        return "No {} in the graph!".format(word1)
+    elif word1 in graph and word2 not in graph:
+        return "No {} in the graph!".format(word2)
+    elif word1 not in graph and word2 not in graph:
+        return "No {} and {} in the graph!".format(word1, word2)
 
     bridge_words = []
     for bridge_word in graph[word1]:
@@ -54,10 +65,12 @@ def generateNewText(graph, text):
         next_word = words[i + 1]
         new_text.append(current_word)
         if current_word in graph:
-            bridge_words = [bw for bw in graph.successors(current_word) if next_word in graph.successors(bw)]
-            if bridge_words:
-                chosen_bridge = random.choice(bridge_words)
-                new_text.append(chosen_bridge)
+            bridge_words_str = queryBridgeWords(graph, current_word, next_word)
+            if "The bridge words" in bridge_words_str:
+                bridge_words = bridge_words_str.split(": ")[1].strip('.').split(", ")
+                if bridge_words:
+                    chosen_bridge = random.choice(bridge_words)
+                    new_text.append(chosen_bridge)
     new_text.append(words[-1])
     return ' '.join(new_text)
 
@@ -139,7 +152,7 @@ def randomWalk(graph, output_file):
 
 
 def main():
-    file_path = "test.txt"
+    file_path = "tst.txt"
     output_file = "out.txt"
 
     graph = buildGraphFromText(file_path)
@@ -182,7 +195,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    ##
-    ##
-    ##
-    ## pycharm
